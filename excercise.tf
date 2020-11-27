@@ -28,9 +28,9 @@ resource "aws_subnet" "terraform-subnet"{
  }
 }
 
-resource "aws_s3" "terraform-bucket"{
+resource "aws_s3_bucket" "terraform-bucket"{
  bucket = "terraform-state"
- acl = private
+ acl = "private"
 
  tags = {
   Name  = "terraform-state"
@@ -39,16 +39,14 @@ resource "aws_s3" "terraform-bucket"{
 }
 
 resource "aws_instance" "terraform_ec2"{
- for_each = toset(var.subnet_cidr)
  ami = "ami-00ddb0e5626798373"
- type = "t2.micro"
- subnet = each.value
+ instance_type = "t2.micro"
+ subnet_id = element(var.subnet_cidr,2)
  tags = {
   Name = "terraform-ec2"
  }
  
  provisioner "local-exec" {
   command = "echo ${aws_instance.terraform_ec2.private_ip} >> ip_list.txt"
- # command = "echo ${aws_instance.terraform_ec2.arn} >> arn.txt"
  }
 }
